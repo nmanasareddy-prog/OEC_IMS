@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OEC Inventory Management System</title>
+    <script>
+      (function () {
+        const repo = '/OEC_IMS';
+        const path = window.location.pathname.replace(repo, '');
+
+        if (path && path !== '/') {
+          const redirectPath = encodeURIComponent(path + window.location.search + window.location.hash);
+          window.location.replace(`${repo}/?p=${redirectPath}`);
+          return;
+        }
+
+        window.location.replace(repo + '/');
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting…</p>
+  </body>
+</html>
