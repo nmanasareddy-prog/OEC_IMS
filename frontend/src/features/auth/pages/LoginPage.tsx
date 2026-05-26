@@ -38,7 +38,7 @@ export function LoginPage() {
           />
         </label>
         {login.isError && (
-          <p className="mt-3 text-sm text-red-600">Invalid credentials. Please try again.</p>
+          <p className="mt-3 text-sm text-red-600">Unable to sign in right now. Please try again.</p>
         )}
         <button
           type="button"

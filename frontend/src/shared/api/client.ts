@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL ?? '';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://oec-ims-api-demo.loca.lt';
 
 export type ApiError = {
   title?: string;
