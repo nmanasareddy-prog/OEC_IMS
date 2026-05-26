@@ -7,7 +7,7 @@
 | **Without setup below** | CI builds only — **no public URL** |
 | **After GitHub Pages setup** | Every push to `main` deploys the **UI** to a public URL |
 
-GitHub Pages hosts **static files only** (your React build). The **.NET API does not run on GitHub Pages**. For login and data to work in the browser, you also need the API on a host (Render, Railway, Azure, etc.) and set `VITE_API_URL` (see below).
+GitHub Pages hosts **static files only** (your React build). The **.NET API does not run on GitHub Pages**. For login and data to work in the browser, you also need the API on a host (Render, Railway, Azure, etc.) and set `VITE_API_URL`.
 
 ---
 
@@ -22,17 +22,16 @@ GitHub Pages hosts **static files only** (your React build). The **.NET API does
 
 ---
 
-## GitHub Pages — UI auto-deploy on push (recommended first step)
+## GitHub Pages — UI auto-deploy on push
 
 ### 1. One-time GitHub repo settings
 
 1. Push this repo to GitHub (branch **`main`**).
 2. Open the repo on GitHub → **Settings** → **Pages**.
-3. Under **Build and deployment** → **Source**, choose **GitHub Actions** (not “Deploy from a branch”).
-4. (Optional, for live API calls from the deployed UI)  
-   **Settings** → **Secrets and variables** → **Actions** → **Variables** → **New repository variable**  
-   - Name: `VITE_API_URL`  
-   - Value: your public API root, e.g. `https://oec-ims-api.onrender.com` (no trailing slash)
+3. Under **Build and deployment** → **Source**, choose **GitHub Actions**.
+4. Add a repository variable:
+   - Name: `VITE_API_URL`
+   - Value: your **permanent** API root, e.g. `https://oec-ims-api.onrender.com` (no trailing slash)
 
 ### 2. Push to `main`
 
@@ -55,47 +54,49 @@ https://<your-github-username>.github.io/<repo-name>/
 
 Example: repo `OEC_IMS` → `https://jane.github.io/OEC_IMS/`
 
-Each push to `main` rebuilds and updates that URL (usually within 1–3 minutes).
-
 ### 4. If the page is blank or 404
 
 - Confirm **Pages** source is **GitHub Actions**.
-- Confirm the workflow used `VITE_BASE_PATH: /<repo-name>/` (handled automatically in `deploy-frontend-pages.yml`).
+- Confirm the workflow used `VITE_BASE_PATH: /<repo-name>/`.
 - Hard-refresh the browser (Ctrl+F5).
 
 ---
 
-## API for a full live demo (second step)
+## Permanent backend configuration
 
-GitHub Pages cannot run the .NET API. Pick one host and deploy `backend/src/OEC.IMS.Api`:
+The frontend now uses the following rules:
+
+- **Local development:** uses the Vite proxy to `http://localhost:5083`
+- **Production builds:** require `VITE_API_URL` to be set explicitly
+
+> Current production tunnel: `https://oec-ims-api-demo.loca.lt`
+
+Set the repository variable at:
+
+- **GitHub** → **Settings** → **Secrets and variables** → **Actions** → **Variables**
+- Name: `VITE_API_URL`
+- Value: your permanent backend URL, e.g. `https://oec-ims-api-demo.loca.lt`
+
+If you want to test a production build locally, update `frontend/.env.production` to your permanent backend URL and rebuild.
+
+---
+
+## API hosting options
+
+Pick one host and deploy `backend/src/OEC.IMS.Api` to a **permanent** URL.
 
 | Host | Notes |
 |------|--------|
-| [Render](https://render.com) | Free tier, good for demos |
-| [Railway](https://railway.app) | Simple .NET deploy |
-| Azure App Service | Closer to enterprise |
+| [Render](https://render.com) | Good for demos |
+| [Railway](https://railway.app) | Simple .NET deployment |
+| Azure App Service | Good for production-style hosting |
 
 On the API host:
 
 1. Run EF migrations / seed.
 2. Set `Jwt:SigningKey` and **CORS** to allow your Pages URL, e.g. `https://<user>.github.io`.
-3. Set GitHub variable `VITE_API_URL` to that API URL and push `main` again (rebuilds the SPA with the correct API).
-
-Until `VITE_API_URL` points to a live API, the **page will open** but login/API calls will fail (expected).
-
-### Single-URL option (advanced)
-
-Build the SPA and copy `frontend/dist` into the API `wwwroot` so one URL serves UI + API — simpler for recruiters, one deploy instead of two.
-
----
-
-## Workflows in this repo
-
-| Workflow | Trigger | Result |
-|----------|---------|--------|
-| `ci-frontend.yml` | push/PR to `main` | Build + lint only |
-| `ci-backend.yml` | push/PR to `main` | Build + test only |
-| **`deploy-frontend-pages.yml`** | **push to `main`** | **Publishes UI to GitHub Pages** |
+3. Set `VITE_API_URL` to the permanent API URL.
+4. Push `main` again so the SPA rebuilds with the new API base.
 
 ---
 
