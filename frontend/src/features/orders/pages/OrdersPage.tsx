@@ -13,6 +13,9 @@ import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { DataTable } from '@/shared/ui/DataTable';
 import { Modal } from '@/shared/ui/Modal';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { Card, CardHeader } from '@/shared/ui/Card';
+import { Badge, orderStatusVariant } from '@/shared/ui/Badge';
+import { LoadingSpinner } from '@/shared/ui/LoadingSpinner';
 import type { OrderListItem } from '@/shared/types/api';
 
 const columnHelper = createColumnHelper<OrderListItem>();
@@ -34,7 +37,10 @@ export function OrdersPage() {
         header: 'Order #',
         cell: (c) => <span className="font-mono text-xs">{c.getValue()}</span>,
       }),
-      columnHelper.accessor('status', { header: 'Status' }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+        cell: (c) => <Badge variant={orderStatusVariant(c.getValue())}>{c.getValue()}</Badge>,
+      }),
       columnHelper.accessor('totalAmount', {
         header: 'Total',
         cell: (c) => `$${c.getValue().toFixed(2)}`,
@@ -76,23 +82,23 @@ export function OrdersPage() {
     <>
       <PageHeader
         title="Orders"
-        description="Create orders with inventory deduction; view line items; cancel pending orders."
+        description="Transactional order placement with EF Core stock deduction and TanStack Query cache invalidation."
       />
 
-      <div className="mb-8 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-900">New order</h3>
-        {parts.data && (
-          <div className="mt-4">
-            <CreateOrderForm
-              parts={parts.data.items}
-              onSubmit={(values) => createOrder.mutate(values)}
-              isPending={createOrder.isPending}
-            />
-          </div>
+      <Card className="mb-8">
+        <CardHeader title="New order" description="Add line items — inventory updates on submit" />
+        {parts.data ? (
+          <CreateOrderForm
+            parts={parts.data.items}
+            onSubmit={(values) => createOrder.mutate(values)}
+            isPending={createOrder.isPending}
+          />
+        ) : (
+          <LoadingSpinner label="Loading parts catalog…" />
         )}
-      </div>
+      </Card>
 
-      {orders.isLoading && <p className="text-slate-500">Loading orders…</p>}
+      {orders.isLoading && <LoadingSpinner label="Loading orders…" />}
       {orders.isError && <p className="text-red-600">Failed to load orders.</p>}
 
       {orders.data && (

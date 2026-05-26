@@ -8,7 +8,8 @@ description: >-
 
 # OEC-IMS Interview Technology Map
 
-Full narrative: [docs/interview/talking-points.md](../../docs/interview/talking-points.md)
+Full narrative: [docs/interview/talking-points.md](../../docs/interview/talking-points.md)  
+**Requirements map (all packages + file paths):** [docs/requirements/technology-requirements-map.md](../../docs/requirements/technology-requirements-map.md)
 
 ## Backend
 

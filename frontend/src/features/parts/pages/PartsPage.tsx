@@ -17,6 +17,10 @@ import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { DataTable } from '@/shared/ui/DataTable';
 import { Modal } from '@/shared/ui/Modal';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
+import { LoadingSpinner } from '@/shared/ui/LoadingSpinner';
+import { Badge } from '@/shared/ui/Badge';
 import type { PartListItem } from '@/shared/types/api';
 
 const columnHelper = createColumnHelper<PartListItem>();
@@ -52,10 +56,10 @@ export function PartsPage() {
         header: 'Stock',
         cell: (c) => {
           const row = c.row.original;
-          return (
-            <span className={row.isLowStock ? 'font-medium text-amber-600' : ''}>
-              {c.getValue()}
-            </span>
+          return row.isLowStock ? (
+            <Badge variant="warning">{c.getValue()} low</Badge>
+          ) : (
+            <span>{c.getValue()}</span>
           );
         },
       }),
@@ -112,20 +116,15 @@ export function PartsPage() {
   return (
     <>
       <PageHeader
-        title="Parts Inventory"
-        description="TanStack Table, React Hook Form, and Zod validation."
+        title="Parts inventory"
+        description="Search, filter, and manage stock. FluentValidation on API; Zod + React Hook Form on UI."
         actions={
-          <button
-            type="button"
-            className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-900"
-            onClick={() => setModal('create')}
-          >
-            New part
-          </button>
+          <Button onClick={() => setModal('create')}>New part</Button>
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-3">
+      <Card className="mb-6">
+      <div className="flex flex-wrap gap-3">
         <input
           className="rounded-md border border-slate-300 px-3 py-2 text-sm"
           placeholder="Search SKU or name"
@@ -162,8 +161,9 @@ export function PartsPage() {
           Low stock only
         </label>
       </div>
+      </Card>
 
-      {isLoading && <p className="text-slate-500">Loading parts…</p>}
+      {isLoading && <LoadingSpinner label="Loading parts…" />}
       {isError && <p className="text-red-600">Failed to load parts.</p>}
 
       {data && (

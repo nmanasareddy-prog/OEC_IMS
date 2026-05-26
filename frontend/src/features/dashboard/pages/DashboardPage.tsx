@@ -1,47 +1,110 @@
+import { useMemo } from 'react';
+import { createColumnHelper } from '@tanstack/react-table';
+import { Link } from 'react-router-dom';
 import { useDashboardMetrics } from '@/features/dashboard/api/use-dashboard';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { StatCard } from '@/shared/ui/StatCard';
+import { Card, CardHeader } from '@/shared/ui/Card';
+import { DataTable } from '@/shared/ui/DataTable';
+import { LoadingSpinner } from '@/shared/ui/LoadingSpinner';
+import { EmptyState } from '@/shared/ui/EmptyState';
+import { Button } from '@/shared/ui/Button';
+import type { DashboardMetrics } from '@/shared/types/api';
+
+type ActivityRow = DashboardMetrics['recentActivity'][number];
+const columnHelper = createColumnHelper<ActivityRow>();
 
 export function DashboardPage() {
   const { data, isLoading, isError } = useDashboardMetrics();
 
+  const activityColumns = useMemo(
+    () => [
+      columnHelper.accessor('partSku', {
+        header: 'SKU',
+        cell: (c) => <span className="font-mono text-xs text-slate-600">{c.getValue()}</span>,
+      }),
+      columnHelper.accessor('partName', { header: 'Part' }),
+      columnHelper.accessor('movementType', { header: 'Type' }),
+      columnHelper.accessor('quantityChange', {
+        header: 'Change',
+        cell: (c) => {
+          const v = c.getValue();
+          return (
+            <span className={v < 0 ? 'font-semibold text-red-600' : 'font-semibold text-emerald-600'}>
+              {v > 0 ? '+' : ''}
+              {v}
+            </span>
+          );
+        },
+      }),
+      columnHelper.accessor('occurredAt', {
+        header: 'When',
+        cell: (c) => new Date(c.getValue()).toLocaleString(),
+      }),
+    ],
+    [],
+  );
+
   return (
     <>
-      <PageHeader title="Dashboard" description="Inventory KPIs and recent stock activity." />
-      {isLoading && <p className="text-slate-500">Loading metrics…</p>}
-      {isError && <p className="text-red-600">Failed to load dashboard.</p>}
+      <PageHeader
+        title="Operations dashboard"
+        description="KPIs powered by TanStack Query; stock movements from EF Core audit data."
+        actions={
+          <Link to="/parts">
+            <Button variant="secondary">Manage parts</Button>
+          </Link>
+        }
+      />
+
+      {isLoading && <LoadingSpinner label="Loading dashboard metrics…" />}
+      {isError && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          Failed to load dashboard. Check API connection.
+        </p>
+      )}
+
       {data && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { label: 'Total Parts', value: data.totalParts },
-              { label: 'Low Stock', value: data.lowStockCount },
-              { label: 'Pending Orders', value: data.pendingOrdersCount },
-              { label: 'Recent Events', value: data.recentActivity.length },
-            ].map((card) => (
-              <div key={card.label} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                <p className="text-sm text-slate-500">{card.label}</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-900">{card.value}</p>
-              </div>
-            ))}
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Total parts"
+              value={data.totalParts}
+              tone="info"
+              icon={<span className="text-lg font-bold">P</span>}
+            />
+            <StatCard
+              label="Low stock"
+              value={data.lowStockCount}
+              tone="warning"
+              hint="Below reorder level"
+              icon={<span className="text-lg font-bold">!</span>}
+            />
+            <StatCard
+              label="Pending orders"
+              value={data.pendingOrdersCount}
+              tone="default"
+              icon={<span className="text-lg font-bold">O</span>}
+            />
+            <StatCard
+              label="Recent movements"
+              value={data.recentActivity.length}
+              tone="success"
+              icon={<span className="text-lg font-bold">↕</span>}
+            />
           </div>
-          <div className="mt-8 rounded-lg border border-slate-200 bg-white shadow-sm">
-            <h3 className="border-b px-4 py-3 text-sm font-semibold text-slate-700">Recent stock activity</h3>
-            <ul className="divide-y">
-              {data.recentActivity.map((a) => (
-                <li key={a.stockMovementId} className="flex justify-between px-4 py-3 text-sm">
-                  <span>
-                    <span className="font-mono text-xs text-slate-500">{a.partSku}</span> — {a.partName}
-                  </span>
-                  <span className={a.quantityChange < 0 ? 'text-red-600' : 'text-green-600'}>
-                    {a.quantityChange > 0 ? '+' : ''}{a.quantityChange} ({a.movementType})
-                  </span>
-                </li>
-              ))}
-              {data.recentActivity.length === 0 && (
-                <li className="px-4 py-6 text-center text-slate-500">No activity yet.</li>
-              )}
-            </ul>
-          </div>
+
+          <Card className="mt-8" padding={false}>
+            <CardHeader title="Recent stock activity" description="Last movements from inventory transactions" />
+            {data.recentActivity.length === 0 ? (
+              <EmptyState
+                title="No stock activity yet"
+                description="Adjust stock or place an order to see movements here."
+              />
+            ) : (
+              <DataTable data={data.recentActivity} columns={activityColumns} />
+            )}
+          </Card>
         </>
       )}
     </>

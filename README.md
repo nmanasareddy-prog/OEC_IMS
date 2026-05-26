@@ -12,7 +12,8 @@ Enterprise-grade automotive **Inventory & Parts Management** — portfolio and i
 | **1** | [Architecture blueprint](docs/architecture/phase-1-architecture-blueprint.md) |
 | **2** | Solution scaffold — [details](docs/architecture/phase-2-scaffold.md) |
 | **3** | Feature implementation — [details](docs/architecture/phase-3-implementation.md) |
-| **4** | Polish & interview-ready (current) — [details](docs/architecture/phase-4-polish.md) |
+| **4** | Polish & interview-ready — [details](docs/architecture/phase-4-polish.md) |
+| **5** | Public deploy (GitHub Pages) — [details](docs/deployment/github-publish.md) |
 
 ## Documentation
 
@@ -24,6 +25,7 @@ Enterprise-grade automotive **Inventory & Parts Management** — portfolio and i
 | [Phase 2 scaffold](docs/architecture/phase-2-scaffold.md) | Solution scaffold |
 | [Phase 3 implementation](docs/architecture/phase-3-implementation.md) | Features delivered |
 | [Phase 4 polish](docs/architecture/phase-4-polish.md) | UX, validation, tables, tests |
+| [**Technology requirements map**](docs/requirements/technology-requirements-map.md) | **Where every required package is used** |
 
 ## Tech stack
 
