@@ -1,4 +1,12 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'https://oec-ims-api-demo.loca.lt';
+const PROD_API_BASE = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+
+if (import.meta.env.PROD && !PROD_API_BASE) {
+  throw new Error(
+    'Production build requires VITE_API_URL to be set to your permanent backend URL.',
+  );
+}
+
+const API_BASE = import.meta.env.PROD ? PROD_API_BASE : '';
 
 export type ApiError = {
   title?: string;
